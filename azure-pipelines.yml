@@ -1,0 +1,30 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  vmAdminPassword: 'Test@123456'
+
+stages:
+- stage: Deploy
+  displayName: 'Deploy Resources Stage'
+
+  jobs:
+  - job: DeployResources
+    displayName: 'Deploy main.bicep'
+
+    steps:
+    - task: AzureCLI@2
+      displayName: 'Deploy Bicep Resources'
+      inputs:
+        azureSubscription: 'bicep-service-connection'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az deployment sub create \
+            --location eastus \
+            --template-file main.bicep \
+            --parameters @main.parameters.json \
+            --parameters adminPassword="$(vmAdminPassword)"
